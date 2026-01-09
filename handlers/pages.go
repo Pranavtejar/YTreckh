@@ -15,6 +15,10 @@ func SignupPage(c echo.Context) error {
 }
 
 func Dashboard(c echo.Context) error {
-	userID := c.Get("user_id")
-	return c.Render(200, "dashboard.html", map[string]any{"UserID": userID})
+	userID := c.Get("username").(string)
+	uuid := c.Get("UUID").(string)
+	return c.Render(200, "dashboard.html", map[string]any{
+		"UserID" : userID,
+		"UUID" : uuid,
+	})
 }

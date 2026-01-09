@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"io"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 
@@ -32,6 +33,15 @@ func main() {
 	e.GET("/signup", handlers.SignupPage)
 	e.POST("/login", handlers.Login)
 	e.POST("/signup", handlers.Signup)
+	e.GET("/logout", func(c echo.Context) error {
+	c.SetCookie(&http.Cookie{
+		Name:   "auth",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	return c.Redirect(302, "/login")
+	})
 
 	g := e.Group("/dashboard")
 	g.Use(auth.AuthMiddleware)

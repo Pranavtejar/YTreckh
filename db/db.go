@@ -20,6 +20,7 @@ func Init() {
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT UNIQUE,
+		uuid TEXT UNIQUE,
 		password TEXT
 	)`)
 	if err != nil {

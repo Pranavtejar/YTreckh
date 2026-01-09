@@ -10,9 +10,11 @@ import (
 
 var jwtSecret = []byte("129301")
 
-func CreateJWT(userID int64) (string, error) {
+func CreateJWT(userID int64, username string, UUID string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
+		"username": username,
+		"UUID": UUID,
 		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
 	}
 
@@ -56,8 +58,11 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		userID := int64(claims["user_id"].(float64))
+		username := claims["username"].(string)
+		uuid, _ := claims["UUID"].(string)
 		c.Set("user_id", userID)
-
+		c.Set("username", username)
+		c.Set("UUID", uuid)
 		return next(c)
 	}
 }
