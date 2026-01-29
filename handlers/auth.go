@@ -30,9 +30,10 @@ func Login(c echo.Context) error {
 
 	token, _ := auth.CreateJWT(userID, username, uuid)
 	c.SetCookie(auth.CreateCookie(token))
-	c.Response().Header().Set("HX-Redirect", "/dashboard")
+	c.Response().Header().Set("HX-Redirect", "/user/homepage")
 	return c.NoContent(http.StatusOK)
 }
+
 
 func Signup(c echo.Context) error {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(c.FormValue("password")), bcrypt.DefaultCost)

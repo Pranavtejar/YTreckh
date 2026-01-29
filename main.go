@@ -43,9 +43,11 @@ func main() {
 	return c.Redirect(302, "/login")
 	})
 
-	g := e.Group("/dashboard")
+	g := e.Group("/user")
 	g.Use(auth.AuthMiddleware)
-	g.GET("", handlers.Dashboard)
+	g.GET("/", handlers.Error)
+	g.GET("/:uuid", handlers.DisProfile)
+	g.GET("/homepage",handlers.Homepage)	
 
 	e.Start(":8080")
 }

@@ -27,3 +27,20 @@ func Init() {
 		log.Fatal(err)
 	}
 }
+
+func GetDetails(uuid string) (map[string]any, error) {
+    row := DB.QueryRow(
+        "SELECT name FROM users WHERE uuid = ?",
+        uuid,
+		) 
+
+    var name string
+    err := row.Scan(&name)
+    if err != nil {
+        return nil, err
+    }
+
+    return map[string]any{
+        "Name": name,
+    }, nil
+}
