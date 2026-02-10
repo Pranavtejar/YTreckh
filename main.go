@@ -48,6 +48,6 @@ func main() {
 	g.GET("/", handlers.Error)
 	g.GET("/:uuid", handlers.DisProfile)
 	g.GET("/homepage",handlers.Homepage)	
-
+	g.POST("/homepage", handlers.Query)
 	e.Start(":8080")
 }

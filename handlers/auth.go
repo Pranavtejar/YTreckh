@@ -52,3 +52,8 @@ func Signup(c echo.Context) error {
 	c.Response().Header().Set("HX-Redirect", "/login")
 	return c.NoContent(http.StatusOK)
 }
+
+func Query(c echo.Context) error {
+	uuid := c.FormValue("input")
+	return c.Redirect(303, "/user/"+uuid)
+}
