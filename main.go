@@ -10,7 +10,6 @@ import (
 	"youtubevid/auth"
 	"youtubevid/db"
 	"youtubevid/handlers"
-	
 )
 
 type Template struct {
@@ -23,6 +22,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 func main() {
 	db.Init()
+
 	e := echo.New()
 	e.Renderer = &Template{
 		t: template.Must(template.ParseGlob("templates/*.html")),
@@ -30,24 +30,33 @@ func main() {
 
 	e.GET("/", handlers.Home)
 	e.GET("/login", handlers.LoginPage)
+	e.GET("/error", handlers.Error)
 	e.GET("/signup", handlers.SignupPage)
+
 	e.POST("/login", handlers.Login)
 	e.POST("/signup", handlers.Signup)
+
 	e.GET("/logout", func(c echo.Context) error {
-	c.SetCookie(&http.Cookie{
-		Name:   "auth",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	})
-	return c.Redirect(302, "/login")
+		c.SetCookie(&http.Cookie{
+			Name:   "auth",
+			Value:  "",
+			Path:   "/",
+			MaxAge: -1,
+		})
+		return c.Redirect(http.StatusSeeOther, "/login")
 	})
 
 	g := e.Group("/user")
 	g.Use(auth.AuthMiddleware)
-	g.GET("/", handlers.Error)
+
+	// FIXED ORDER (important)
+	g.GET("/homepage", handlers.Homepage)
+	g.GET("/library", handlers.LibraryPage)
 	g.GET("/:uuid", handlers.DisProfile)
-	g.GET("/homepage",handlers.Homepage)	
+
 	g.POST("/homepage", handlers.Query)
-	e.Start(":8080")
+	g.POST("/library", handlers.Library)
+
+	e.Logger.Fatal(e.Start(":8080"))
 }
+

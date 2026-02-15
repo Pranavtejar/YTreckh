@@ -27,9 +27,15 @@ func Homepage(c echo.Context) error {
 	if !ok || username == "" {
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
+	userIDVal := c.Get("user_id")
+	uuidValRaw := c.Get("UUID")
 
-	userID, _ := c.Get("user_id").(int64)
-	uuidVal, _ := c.Get("UUID").(string)
+	userID, ok1 := userIDVal.(int64)
+	uuidVal, ok2 := uuidValRaw.(string)
+
+	if !ok1 || !ok2 {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
 
 	data := map[string]any{
 		"Username": username,
@@ -47,4 +53,9 @@ func DisProfile(c echo.Context) error {
         return c.Render(404, "error.html", map[string]any{"UUID": uuid})
     }
     return c.Render(200, "profile.html", details)
+}
+
+//MAKE ALL THE EXISTING PLAYLISTS REGISTERED TO THIS ACCOUNT SHOW UP ON THE PAGE 
+func LibraryPage(c echo.Context) error {
+	return c.Render(http.StatusOK, "library.html",nil)
 }

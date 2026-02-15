@@ -39,10 +39,11 @@ func Signup(c echo.Context) error {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(c.FormValue("password")), bcrypt.DefaultCost)
 
 	_, err := db.DB.Exec(
-			"INSERT INTO users(name, uuid, password) VALUES(?, ?, ?)",
+			"INSERT INTO users(name, uuid, password, playlist) VALUES(?, ?, ?, ?)",
 			c.FormValue("username"),
 			uuid.New().String(),
 			hash,
+			"[]",
 	)
 	
 	if err != nil {
@@ -57,3 +58,44 @@ func Query(c echo.Context) error {
 	uuid := c.FormValue("input")
 	return c.Redirect(303, "/user/"+uuid)
 }
+
+func Library(c echo.Context) error {
+	name := c.FormValue("PlaylistName")
+	if name == "" {
+		return c.Render(http.StatusBadRequest, "dashboard.html", map[string]any{
+			"Error": "playlist name required",
+		})
+	}
+
+	id := uuid.New().String()
+	userUUID := c.Get("UUID").(string)
+
+	// declare err ONCE
+	_, err := db.DB.Exec(
+		"INSERT INTO playlists(name, uuid, songs) VALUES(?, ?, ?)",
+		name,
+		id,
+		"[]",
+	)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, "dashboard.html", map[string]any{
+			"Error": err.Error(),
+		})
+	}
+
+	// reuse err (NO := here)
+	_, err = db.DB.Exec(
+		"UPDATE users SET playlist = ? WHERE uuid = ?",
+		id,
+		userUUID,
+	)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, "dashboard.html", map[string]any{
+			"Error": err.Error(),
+		})
+	}
+
+	c.Response().Header().Set("HX-Refresh", "true")
+	return c.NoContent(http.StatusOK)
+}
+
