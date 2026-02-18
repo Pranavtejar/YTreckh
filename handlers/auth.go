@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -62,15 +63,17 @@ func Query(c echo.Context) error {
 func Library(c echo.Context) error {
 	name := c.FormValue("PlaylistName")
 	if name == "" {
-		return c.Render(http.StatusBadRequest, "dashboard.html", map[string]any{
-			"Error": "playlist name required",
-		})
+		return c.String(http.StatusBadRequest, "playlist name is required")
+	}
+
+	userUUID, ok := c.Get("UUID").(string)
+	if !ok || userUUID == "" {
+		return c.String(http.StatusUnauthorized, "user not authenticated")
 	}
 
 	id := uuid.New().String()
-	userUUID := c.Get("UUID").(string)
 
-	// declare err ONCE
+	// INSERT playlist
 	_, err := db.DB.Exec(
 		"INSERT INTO playlists(name, uuid, songs) VALUES(?, ?, ?)",
 		name,
@@ -78,24 +81,23 @@ func Library(c echo.Context) error {
 		"[]",
 	)
 	if err != nil {
-		return c.Render(http.StatusBadRequest, "dashboard.html", map[string]any{
-			"Error": err.Error(),
-		})
+		fmt.Println("INSERT PLAYLIST ERROR:", err)
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	// reuse err (NO := here)
+	// UPDATE user
 	_, err = db.DB.Exec(
 		"UPDATE users SET playlist = ? WHERE uuid = ?",
 		id,
 		userUUID,
 	)
 	if err != nil {
-		return c.Render(http.StatusBadRequest, "dashboard.html", map[string]any{
-			"Error": err.Error(),
-		})
+		fmt.Println("UPDATE USER ERROR:", err)
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	c.Response().Header().Set("HX-Refresh", "true")
+	// SUCCESS
+	c.Response().Header().Set("HX-Redirect", "/user/library")
 	return c.NoContent(http.StatusOK)
 }
 

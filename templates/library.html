@@ -1,92 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Library</title>
-	<script src="https://unpkg.com/htmx.org@1.9.10"></script>
-	<style>
-		body {
-			font-family: system-ui, sans-serif;
-			background: #0f0f0f;
-			color: #fff;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			height: 100vh;
-		}
-
-		.card {
-			background: rgba(255,255,255,0.08);
-			backdrop-filter: blur(12px);
-			padding: 24px;
-			border-radius: 14px;
-			width: 320px;
-			box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-		}
-
-		h2 {
-			margin-bottom: 16px;
-			text-align: center;
-		}
-
-		input {
-			width: 100%;
-			padding: 10px;
-			border-radius: 8px;
-			border: none;
-			outline: none;
-			margin-bottom: 14px;
-			background: #1c1c1c;
-			color: white;
-		}
-
-		button {
-			width: 100%;
-			padding: 10px;
-			border-radius: 8px;
-			border: none;
-			cursor: pointer;
-			background: #4f46e5;
-			color: white;
-			font-weight: 600;
-		}
-
-		button:hover {
-			background: #4338ca;
-		}
-
-		.error {
-			color: #ff6b6b;
-			margin-top: 10px;
-			text-align: center;
-		}
-	</style>
+  <meta charset="UTF-8">
+  <title>Library</title>
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      padding: 24px;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      margin-bottom: 2rem;
+    }
+    h2 {
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-bottom: 14px;
+      background: #1c1c1c;
+      color: white;
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #4f46e5;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    button:hover {
+      background: #4338ca;
+    }
+    .error {
+      color: #ff6b6b;
+      margin-top: 12px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    .playlist-list {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .playlist-item {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s;
+    }
+    .playlist-item:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-2px);
+    }
+    .playlist-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .playlist-info {
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+  </style>
 </head>
 <body>
 
-<div class="card">
-	<h2>Create Playlist</h2>
+  <div class="card">
+    <h2>Create Playlist</h2>
+    <form hx-post="/user/library">
+      <input
+        type="text"
+        name="PlaylistName"
+        placeholder="Playlist name"
+        required
+        autofocus
+      >
+      <button type="submit">Create</button>
+    </form>
 
-	<form 
-		hx-post="/user/library"
-		hx-target="body"
-		hx-swap="outerHTML"
-	>
-		<input 
-			type="text" 
-			name="PlaylistName" 
-			placeholder="Playlist name"
-			required
-		>
+    {{ if .Error }}
+      <div class="error">{{ .Error }}</div>
+    {{ end }}
+  </div>
 
-		<button type="submit">Create</button>
-	</form>
-
-	{{ if .Error }}
-		<div class="error">{{ .Error }}</div>
-	{{ end }}
-</div>
+  <!-- Display all playlists below the form -->
+  <div class="playlist-list">
+    {{ range .Playlists }}
+      <div class="playlist-item">
+        <div class="playlist-name">{{ .name }}</div>
+        <div class="playlist-info">
+          ID: {{ .id }} • UUID: {{ .uuid }} • Songs: {{ .songs }}
+        </div>
+      </div>
+    {{ else }}
+      <div style="text-align:center; color:#888; padding:20px;">
+        No playlists yet
+      </div>
+    {{ end }}
+  </div>
 
 </body>
 </html>
-

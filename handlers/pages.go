@@ -57,5 +57,32 @@ func DisProfile(c echo.Context) error {
 
 //MAKE ALL THE EXISTING PLAYLISTS REGISTERED TO THIS ACCOUNT SHOW UP ON THE PAGE 
 func LibraryPage(c echo.Context) error {
-	return c.Render(http.StatusOK, "library.html",nil)
+	rows, err := db.DB.Query("SELECT id, name, uuid, songs FROM playlists")
+	if err != nil{
+		return c.Render(404, "error.html", nil)
+	}
+	defer rows.Close()
+	var playlists []map[string]any
+
+	for rows.Next(){
+		var id int
+		var uuid string
+		var name string
+		var songs string
+
+		if err := rows.Scan(&id, &name, &uuid, &songs); err != nil{
+			return c.String(500, err.Error())
+		}
+
+		playlists = append(playlists, map[string]any{
+			"id":id,
+			"uuid":uuid,
+			"name":name,
+			"songs":songs,
+		})
+	}
+	
+	return c.Render(http.StatusOK, "library.html",map[string]any{
+		"Playlists": playlists,
+	})
 }
