@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"strings"
+
 	"net/http"
 	"youtubevid/db"
 	"github.com/labstack/echo/v4"
@@ -55,7 +57,6 @@ func DisProfile(c echo.Context) error {
     return c.Render(200, "profile.html", details)
 }
 
-//MAKE ALL THE EXISTING PLAYLISTS REGISTERED TO THIS ACCOUNT SHOW UP ON THE PAGE 
 func LibraryPage(c echo.Context) error {
 	rows, err := db.DB.Query("SELECT id, name, uuid, songs FROM playlists")
 	if err != nil{
@@ -85,4 +86,22 @@ func LibraryPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "library.html",map[string]any{
 		"Playlists": playlists,
 	})
+}
+
+func DisPlaylist(c echo.Context) error {
+	playlistUUID := c.Param("uuid")
+	var name string
+	var songsRaw string
+	err := db.DB.QueryRow("SELECT name, songs FROM playlists WHERE uuid=?", playlistUUID).Scan(&name, &songsRaw)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+	songs := strings.Split(songsRaw, ",")
+
+	details := map[string]any{
+		"name": name,
+		"songs": songs,
+	}
+
+	return c.Render(http.StatusOK, "playlist.html", details)
 }

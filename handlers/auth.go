@@ -87,10 +87,17 @@ func Library(c echo.Context) error {
 
 	// UPDATE user
 	_, err = db.DB.Exec(
-		"UPDATE users SET playlist = ? WHERE uuid = ?",
+		// SQL logic to append only if data exists, otherwise just set it
+		`UPDATE users SET playlist = CASE 
+				WHEN playlist = '' OR playlist IS NULL THEN ? 
+				ELSE playlist || ',' || ? 
+		END WHERE uuid = ?`,
+		id,
 		id,
 		userUUID,
 	)
+
+
 	if err != nil {
 		fmt.Println("UPDATE USER ERROR:", err)
 		return c.String(http.StatusInternalServerError, err.Error())

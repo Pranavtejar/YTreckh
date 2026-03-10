@@ -113,12 +113,12 @@
   <!-- Display all playlists below the form -->
   <div class="playlist-list">
     {{ range .Playlists }}
-      <div class="playlist-item">
-        <div class="playlist-name">{{ .name }}</div>
-        <div class="playlist-info">
-          ID: {{ .id }} • UUID: {{ .uuid }} • Songs: {{ .songs }}
-        </div>
+     <a href="/playlist/{{ .uuid }}" class="playlist-item">
+      <div class="playlist-name">{{ .name }}</div>
+      <div class="playlist-info">
+        ID: {{ .id }} • UUID: {{ .uuid }} • Songs: {{ .songs }}
       </div>
+    </a>
     {{ else }}
       <div style="text-align:center; color:#888; padding:20px;">
         No playlists yet

@@ -46,10 +46,16 @@ func main() {
 		return c.Redirect(http.StatusSeeOther, "/login")
 	})
 
+	// FIXED: Added AuthMiddleware BEFORE PlaylistView
+	// Order matters: Auth sets the username, PlaylistView reads it.
+	p := e.Group("/playlist")
+	p.Use(auth.AuthMiddleware) 
+	p.Use(auth.PlaylistView)
+	p.GET("/:uuid", handlers.DisPlaylist)
+
 	g := e.Group("/user")
 	g.Use(auth.AuthMiddleware)
 
-	// FIXED ORDER (important)
 	g.GET("/homepage", handlers.Homepage)
 	g.GET("/library", handlers.LibraryPage)
 	g.GET("/:uuid", handlers.DisProfile)
@@ -59,4 +65,3 @@ func main() {
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
-
