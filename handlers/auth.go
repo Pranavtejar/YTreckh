@@ -78,7 +78,7 @@ func Library(c echo.Context) error {
 		"INSERT INTO playlists(name, uuid, songs) VALUES(?, ?, ?)",
 		name,
 		id,
-		"[]",
+		"",
 	)
 	if err != nil {
 		fmt.Println("INSERT PLAYLIST ERROR:", err)
@@ -108,3 +108,18 @@ func Library(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
+func AddSong(c echo.Context) error {
+	vidName := c.FormValue("vidName")
+	
+	_, err := db.DB.Exec(
+		"INSERT INTO playlists(songs) VALUES (?)",
+		vidName,
+	)
+
+	if err != nil{
+		fmt.Println("INSERT PLAYLIST ERROR:", err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	
+}
